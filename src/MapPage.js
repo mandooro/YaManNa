@@ -134,8 +134,11 @@ class MapPage extends React.Component {
                         //     map.setCenter(center);
                         // });
 
+                        var infowindow
+
                         starCountRef.on('child_added', function(data) {
                             if(marker != null) marker.setMap(null)
+                            if(infowindow != null) infowindow.close()
 
                             garo += (data.val().lat * 1)
                             sero += (data.val().lon * 1)
@@ -173,6 +176,18 @@ class MapPage extends React.Component {
                                 image : markerImage2 // 마커 이미지
                             });
                             map.setCenter(center);
+
+                            var iwContent = "당신들의 중간은 여기입니다", // 인포윈도우에 표시할 내용
+                                iwRemoveable = true;
+
+                            // 인포윈도우를 생성합니다
+                            infowindow = new window.daum.maps.InfoWindow({
+                                content : iwContent,
+                                removable : iwRemoveable
+                            });
+
+                            // 인포윈도우를 마커위에 표시합니다
+                            infowindow.open(map, marker);
 
                             map.setBounds(bounds);
 
