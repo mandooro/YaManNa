@@ -1,13 +1,20 @@
 import React from 'react';
 import { fire,getFireDB } from './shared/firebase'
 import './Map.css'
-
+import TextField from '@material-ui/core/TextField';
+import Dialog from '@material-ui/core/Dialog';
 
 class MapPage extends React.Component {
 
     constructor() {
         super();
         fire();
+        this.state = {
+            searchDialog: false
+        };
+
+        this.handleClick = this.handleClick.bind(this);
+        this.handleClose = this.handleClose.bind(this);
     }
 
     componentDidMount() {
@@ -50,7 +57,6 @@ class MapPage extends React.Component {
         const history = this.props.history;
 
         if (navigator.geolocation) {
-            console.log('hihi2')
             // GeoLocation을 이용해서 접속 위치를 얻어옵니다
             navigator.geolocation.getCurrentPosition(
                 function(position) {
@@ -213,11 +219,37 @@ class MapPage extends React.Component {
 
     }
 
+    handleClick() {
+        this.setState({ searchDialog: true });
+    }
+
+    handleClose = () => {
+        this.setState({ searchDialog: false });
+    };
 
 
     render() {
         return (
             <div className="App App-header">
+                <TextField
+                    id="standard-search"
+                    label="Search field"
+                    type="search"
+                    margin="normal"
+                    onClick={this.handleClick}
+                />
+                <Dialog
+                    onClose={this.handleClose}
+                    aria-labelledby="customized-dialog-title"
+                    open={this.state.searchDialog}
+                >
+                    <TextField
+                        id="standard-search2"
+                        label="Search field"
+                        type="search"
+                        margin="normal"
+                    />
+                </Dialog>
                 <div id="map" className="mapClass"/>
             </div>
         );
