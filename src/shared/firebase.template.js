@@ -1,22 +1,22 @@
-import * as firebase from 'firebase'
+import firebase from 'firebase/app';
+import 'firebase/database';
+
 let database;
-let config = {
-    apiKey: "",
-    authDomain: "",
-    databaseURL: "",
-    projectId: "",
-    storageBucket: "",
-    messagingSenderId: "",
-    appId: ""
-}
+const config = {
+  apiKey: '',
+  authDomain: '',
+  databaseURL: '',
+  projectId: '',
+  storageBucket: '',
+  messagingSenderId: '',
+  appId: '',
+};
 
 export const fire = () => {
-    if (!firebase.apps.length) {
-        firebase.initializeApp(config);
-    }
-    database = firebase.database()
-}
+  if (!firebase.apps.length) {
+    firebase.initializeApp(config);
+  }
+  database = firebase.database();
+};
 
-export const getFireDB = () => {
-    return database
-}
+export const getFireDB = () => database;

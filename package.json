@@ -9,6 +9,7 @@
     "eslint-config-airbnb": "^17.1.1",
     "firebase": "^6.3.0",
     "node-sass": "^4.12.0",
+    "prop-types": "^15.7.2",
     "react": "^16.8.6",
     "react-cookie": "^4.0.0",
     "react-dom": "^16.8.6",
@@ -23,11 +24,15 @@
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
-    "extends": ["react-app", "airbnb"],
+    "extends": [
+      "react-app",
+      "airbnb"
+    ],
     "rules": {
       "react/prefer-stateless-function": 0,
       "react/jsx-filename-extension": 0,
-      "react/jsx-one-expression-per-line": 0
+      "react/jsx-one-expression-per-line": 0,
+      "react/forbid-prop-types": 0
     }
   },
   "browserslist": {

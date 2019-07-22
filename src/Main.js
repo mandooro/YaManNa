@@ -1,30 +1,39 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import './Main.scss';
 import Container from '@material-ui/core/Container';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
+import Typography from '@material-ui/core/Typography';
+import Box from '@material-ui/core/Box';
 import { withStyles } from '@material-ui/styles';
-import { fire, getFireDB } from './shared/firebase';
+import { getFireDB } from './shared/firebase';
 
-const styles = {
+const styles = theme => ({
   root: {
     flexGrow: 1,
-    backgroundColor: 'purple',
     color: 'white',
     width: '100%',
     height: '100%',
   },
   paper: {
+    padding: theme.spacing(1),
     textAlign: 'center',
-    backgroundColor: 'purple',
+    color: theme.palette.primary.main,
   },
-};
+  center: {
+    position: 'absolute',
+    top: '50%',
+    transform: 'translate(0, -50%)',
+    width: '100%',
+  },
+});
 
 class Main extends React.Component {
-  constructor() {
-    super();
-    fire();
+  static propTypes = {
+    classes: PropTypes.object.isRequired,
+    history: PropTypes.object.isRequired,
   }
 
   componentDidMount() {
@@ -60,27 +69,36 @@ class Main extends React.Component {
   }
 
   render() {
-    // TODO 디자인 필요
+    const { classes } = this.props;
     return (
-      <Container fixed className={this.props.classes.root}>
-        <div>
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
-              <Paper className={this.props.classes.paper}>
-                <CircularProgress color="primary" />
-              </Paper>
+      <Typography component="div">
+        <Container fixed>
+          <div>
+            <Grid
+              container
+              spacing={4}
+              direction="row"
+              justify="center"
+              alignItems="center"
+              className={classes.center}
+            >
+              <Grid item xs={12}>
+                <Paper elevation={0} className={classes.paper}>
+                  <CircularProgress color="primary" />
+                </Paper>
+              </Grid>
+              <Grid item xs={12}>
+                <Paper elevation={0} className={classes.paper}>
+                  <Box>SPOT 생성 중입니다...</Box>
+                </Paper>
+              </Grid>
             </Grid>
-            <Grid item xs={3} />
-            <Grid item xs={6}>
-              <Paper className={this.props.classes.paper}>
-                <div>준비 중입니다</div>
-              </Paper>
-            </Grid>
-          </Grid>
-        </div>
-      </Container>
+          </div>
+        </Container>
+      </Typography>
     );
   }
 }
+
 
 export default withStyles(styles)(Main);
