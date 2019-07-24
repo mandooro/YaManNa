@@ -5,6 +5,7 @@ import Container from '@material-ui/core/Container';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import { withStyles } from '@material-ui/styles';
+import Icon from '@material-ui/core/Icon';
 import { getFireDB } from './shared/firebase';
 import SearchBar from './SearchBar';
 
@@ -20,6 +21,12 @@ const styles = theme => ({
     padding: theme.spacing(1),
     textAlign: 'center',
     color: theme.palette.primary.main,
+  },
+  icon: {
+    position: 'fixed',
+    right: '20px',
+    bottom: '10px',
+    zIndex: '10',
   },
 });
 
@@ -166,7 +173,7 @@ class MapPage extends React.Component {
       // 마커 이미지의 이미지 크기와 이미지 입니다
       const imageSize = new window.kakao.maps.Size(40, 50);
       // TODO 마커 이미지 어떡하지? 엑스자 표시같은거 좋을듯 원피스 보물처럼
-      const imageSrc = '//t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png';
+      const imageSrc = '//www.freepngimg.com/download/map/62663-vector-map-google-center-icons-maps-computer.png';
       // 마커 이미지를 생성합니다
       const markerImage = new window.kakao.maps.MarkerImage(imageSrc, imageSize);
 
@@ -188,6 +195,23 @@ class MapPage extends React.Component {
     }
   };
 
+  sendLink = () => {
+    const { match: { params } } = this.props;
+    const { id } = params;
+    window.Kakao.Link.sendDefault({
+      objectType: 'feed',
+      content: {
+        title: '중간 위치에서 만나세요',
+        description: '중간 위치를 찾아주는 중간 위치 앱!',
+        imageUrl: 'http://mblogthumb2.phinf.naver.net/MjAxODAxMDlfMTMx/MDAxNTE1NDkwNzAxNjQ5.TDRphYc2xTlO5JpsAZjYoXXQKZZvM-TciZN3F8CyBFMg.G2mOPygc54OQvtb3Y5fg_v3b_2AYX9ix4lvWAFY-sBsg.JPEG.jongmin963/Screenshot_20180109-160050.jpg?type=w800',
+        link: {
+          mobileWebUrl: `http://localhost:3000/spot/${id}`,
+          webUrl: `http://localhost:3000/spot/${id}`,
+        },
+      },
+    });
+  };
+
   render() {
     const { classes } = this.props;
     return (
@@ -198,6 +222,7 @@ class MapPage extends React.Component {
             <Box id="map" width={1} height={1} />
           </Box>
         </Container>
+        <Icon className={classes.icon} onClick={this.sendLink} color="primary" fontSize="large">share</Icon>
       </Typography>
     );
   }
