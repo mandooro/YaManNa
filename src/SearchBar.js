@@ -16,6 +16,14 @@ class SearchBar extends React.Component {
       results: [],
     }
 
+    handleSearchResult = (v, e) => {
+      console.log('hihi');
+      console.log(v);
+      console.log(this.props)
+      this.props.addMyMarker(v.y, v.x);
+      this.setState({ searchDialog: false });
+    }
+
     handleChange = (e) => {
       this.setState({
         addr: e.target.value,
@@ -136,7 +144,7 @@ class SearchBar extends React.Component {
           >
             <AppBar position="relative">
               <Toolbar>
-                <Typography variant="h6" marginLeft="theme.spacing(2)" flex={1}>
+                <Typography variant="h6" flex={1}>
                                 장소 검색
                 </Typography>
                 <IconButton edge="end" color="inherit" onClick={this.handleClose} aria-label="Close">
@@ -146,7 +154,7 @@ class SearchBar extends React.Component {
             </AppBar>
             <List>
               {results.map(value => (
-                <ListItem button>
+                <ListItem button onClick={e => this.handleSearchResult(value, e)} key={value.id}>
                   <ListItemText
                     primary={value.place_name}
                     secondary={value.address_name}

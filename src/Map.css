@@ -1,26 +1,7 @@
-
-html, body, #map, .App {
+html, body{
   width: 100%;
   height: 100%;
   margin: 0;
   padding: 0;
-}
-
-#map {
-  position: relative;
-}
-
-.mapClass {
-  width:100%;
-  height:100%;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
 }
 

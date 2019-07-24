@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import './Main.scss';
 import Container from '@material-ui/core/Container';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Paper from '@material-ui/core/Paper';
@@ -37,26 +36,13 @@ class Main extends React.Component {
   }
 
   componentDidMount() {
-    const goSpotPage = (lat, lon) => {
-      getFireDB().ref().push({ master: { lat, lon } })
-        .then((result) => {
-          const { key } = result;
-          window.localStorage.setItem(key, 'master');
-          const { history } = this.props;
-          history.push(`/spot/${key}`);
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-    };
-
     if (navigator.geolocation) {
       // GeoLocation을 이용해서 접속 위치를 얻어옵니다
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const lat = position.coords.latitude; // 위도
           const lon = position.coords.longitude; // 경도
-          goSpotPage(lat, lon);
+          this.goSpotPage(lat, lon);
         },
         (err) => {
           console.warn(`ERROR(${err.code}): ${err.message}`);
@@ -64,9 +50,22 @@ class Main extends React.Component {
       );
     } else { // HTML5의 GeoLocation을 사용할 수 없을때 마커 표시 위치와 인포윈도우 내용을 설정합니다
       // 일단 카카오 본사로 찍고 스팟 보냄
-      goSpotPage(33.450701, 126.570667);
+      this.goSpotPage(33.450701, 126.570667);
     }
   }
+
+  goSpotPage = (lat, lon) => {
+    getFireDB().ref().push({ master: { lat, lon } })
+      .then((result) => {
+        const { key } = result;
+        window.localStorage.setItem(key, 'master');
+        const { history } = this.props;
+        history.push(`/spot/${key}`);
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  };
 
   render() {
     const { classes } = this.props;
