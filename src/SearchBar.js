@@ -70,6 +70,15 @@ class SearchBar extends React.Component {
     });
   }
 
+  handleMyPClick = () => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude; // 위도
+        const lon = position.coords.longitude; // 경도
+        this.props.addMyMarker(lat, lon);
+      });
+  }
+
   handleBtnClick = () => {
     // 검색 input
     const input = this.state.addr;
@@ -171,8 +180,14 @@ class SearchBar extends React.Component {
             <SearchIcon />
           </IconButton>
           <Divider className={classes.divider} />
-          <IconButton color="primary" className={classes.iconButton} aria-label="Directions">
+          <IconButton
+            id="myP" color="primary" className={classes.iconButton} aria-label="Directions"
+            onClick={this.handleMyPClick}
+          >
             <DirectionsIcon />
+            <Typography variant="caption" display="block">
+              내위치
+            </Typography>
           </IconButton>
 
         </Grid>
