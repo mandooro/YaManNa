@@ -6,6 +6,7 @@ import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import { withStyles } from '@material-ui/styles';
 import Icon from '@material-ui/core/Icon';
+import HelpOutlinedIcon from '@material-ui/icons/HelpOutlined';
 import { getFireDB } from './shared/firebase';
 import { getCenter, basicCenterAlorithm } from './lib/utils';
 import SearchBar from './SearchBar';
@@ -28,6 +29,13 @@ const styles = theme => ({
     right: '20px',
     bottom: '10px',
     zIndex: '10',
+  },
+  icon2: {
+    position: 'fixed',
+    left: '20px',
+    bottom: '10px',
+    zIndex: '10',
+    padding: 10,
   },
 });
 
@@ -213,6 +221,10 @@ class MapPage extends React.Component {
     });
   };
 
+  showHelper = () => {
+    console.log('hi');
+  }
+
   render() {
     const { classes } = this.props;
     return (
@@ -223,6 +235,7 @@ class MapPage extends React.Component {
             <Box id="map" width={1} height={1} />
           </Box>
         </Container>
+        <HelpOutlinedIcon className={classes.icon2} onClick={this.showHelper} color="primary">help</HelpOutlinedIcon>
         <Icon className={classes.icon} onClick={this.sendLink} color="primary" fontSize="large">share</Icon>
       </Typography>
     );
