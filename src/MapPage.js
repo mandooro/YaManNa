@@ -7,6 +7,7 @@ import Box from '@material-ui/core/Box';
 import { withStyles } from '@material-ui/styles';
 import Icon from '@material-ui/core/Icon';
 import { getFireDB } from './shared/firebase';
+import { getCenter, basicCenterAlorithm } from './lib/utils';
 import SearchBar from './SearchBar';
 
 const styles = theme => ({
@@ -167,9 +168,9 @@ class MapPage extends React.Component {
     if (centerMarker != null) centerMarker.setMap(null);
     if (markers.length > 0) {
       // 새로운 센터 위치 계산 로직
-      const count = markers.length;
-      const centerLat = markers.reduce(((p, c) => p + c.getPosition().getLat()), 0);
-      const centerLon = markers.reduce(((p, c) => p + c.getPosition().getLng()), 0);
+      const centerData = getCenter(markers, basicCenterAlorithm)
+      const centerLat = centerData.lat
+      const centerLon = centerData.lon
       // 마커 이미지의 이미지 크기와 이미지 입니다
       const imageSize = new window.kakao.maps.Size(40, 50);
       // TODO 마커 이미지 어떡하지? 엑스자 표시같은거 좋을듯 원피스 보물처럼
@@ -177,7 +178,7 @@ class MapPage extends React.Component {
       // 마커 이미지를 생성합니다
       const markerImage = new window.kakao.maps.MarkerImage(imageSrc, imageSize);
 
-      const center = new window.kakao.maps.LatLng(centerLat / count, centerLon / count);
+      const center = new window.kakao.maps.LatLng(centerLat, centerLon);
       const marker = new window.kakao.maps.Marker({
         map, // 마커를 표시할 지도
         position: center, // 마커를 표시할 위치
