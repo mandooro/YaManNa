@@ -76,7 +76,8 @@ class SearchBar extends React.Component {
         const lat = position.coords.latitude; // 위도
         const lon = position.coords.longitude; // 경도
         this.props.addMyMarker(lat, lon);
-      });
+      },
+    );
   }
 
   handleBtnClick = () => {
@@ -181,7 +182,10 @@ class SearchBar extends React.Component {
           </IconButton>
           <Divider className={classes.divider} />
           <IconButton
-            id="myP" color="primary" className={classes.iconButton} aria-label="Directions"
+            id="myP"
+            color="primary"
+            className={classes.iconButton}
+            aria-label="Directions"
             onClick={this.handleMyPClick}
           >
             <DirectionsIcon />
