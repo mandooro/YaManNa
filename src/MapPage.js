@@ -7,9 +7,14 @@ import Box from '@material-ui/core/Box';
 import { withStyles } from '@material-ui/styles';
 import Icon from '@material-ui/core/Icon';
 import HelpOutlinedIcon from '@material-ui/icons/HelpOutlined';
+import Dialog from '@material-ui/core/Dialog';
+import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from '@material-ui/icons/Close';
+import Toolbar from '@material-ui/core/Toolbar';
 import { getFireDB } from './shared/firebase';
 import { getCenter, basicCenterAlorithm } from './lib/utils';
 import SearchBar from './SearchBar';
+import Helper from './Helper';
 
 const styles = theme => ({
   root: {
@@ -45,6 +50,7 @@ class MapPage extends React.Component {
     markers: [],
     myMarker: null, // 내 마커의 키
     centerMarker: null,
+    helper: false,
   }
 
   static propTypes = {
@@ -222,11 +228,20 @@ class MapPage extends React.Component {
   };
 
   showHelper = () => {
-    console.log('hi');
+    this.setState({
+      helper: true,
+    });
+  }
+
+  closeHelper = () => {
+    this.setState({
+      helper: false,
+    });
   }
 
   render() {
     const { classes } = this.props;
+    const { helper } = this.state;
     return (
       <Typography component="div" className={classes.root}>
         <Container className={classes.root} p={0}>
@@ -237,6 +252,14 @@ class MapPage extends React.Component {
         </Container>
         <HelpOutlinedIcon className={classes.icon2} onClick={this.showHelper} color="primary">help</HelpOutlinedIcon>
         <Icon className={classes.icon} onClick={this.sendLink} color="primary" fontSize="large">share</Icon>
+        <Dialog fullScreen open={helper} onClose={this.closeHelper}>
+          <Toolbar>
+            <IconButton edge="end" color="inherit" onClick={this.closeHelper} aria-label="close">
+              <CloseIcon />
+            </IconButton>
+          </Toolbar>
+          <Helper />
+        </Dialog>
       </Typography>
     );
   }

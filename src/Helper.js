@@ -31,7 +31,9 @@ class Helper extends React.Component {
 
   render() {
     return (
-      <div />
+      <div>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HELPER
+      </div>
     );
   }
 }
