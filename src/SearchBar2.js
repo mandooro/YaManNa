@@ -6,7 +6,7 @@ import {
 } from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
 import CloseIcon from '@material-ui/icons/Close';
-import { withStyles } from '@material-ui/styles';
+import { withStyles, ThemeProvider } from '@material-ui/styles';
 import Grid from '@material-ui/core/Grid';
 import InputBase from '@material-ui/core/InputBase';
 import Divider from '@material-ui/core/Divider';
@@ -16,6 +16,8 @@ import SearchIcon from '@material-ui/icons/Search';
 import AddIcon from '@material-ui/icons/Add';
 import DirectionsIcon from '@material-ui/icons/Directions';
 import PropTypes from 'prop-types';
+import { fade, makeStyles, createMuiTheme } from '@material-ui/core/styles';
+import { red } from '@material-ui/core/colors';
 
 const styles = theme => ({
   root: {
@@ -41,6 +43,12 @@ const styles = theme => ({
     width: 1,
     height: 28,
     margin: 4,
+  },
+});
+
+const theme = createMuiTheme({
+  palette: {
+    primary: red,
   },
 });
 
@@ -160,56 +168,15 @@ class SearchBar extends React.Component {
     const { classes } = this.props;
     return (
       <div>
-        <Grid
-          container
-          direction="row"
-          justify="space-evenly"
-          alignItems="flex-end"
-        >
-          <Grid item xs={12}>
-            <IconButton
-              id="searchBtn"
-              onClick={this.openSearchDialog}
-              className={classes.iconButton}
-              aria-label="Search"
-            >
-              <AddIcon />
-            </IconButton>
-          </Grid>
-          <Grid item xs={12}>
-            <IconButton className={classes.iconButton} aria-label="Menu">
-              <MenuIcon />
-            </IconButton>
-            <InputBase
-              id="standard-search"
-              value={addr}
-              onChange={this.handleChange}
-              className={classes.input}
-              placeholder="장소를 검색하세요!"
-              inputProps={{ 'aria-label': '장소를 검색하세요!' }}
-            />
-            <IconButton
-              id="searchBtn"
-              onClick={this.handleBtnClick}
-              className={classes.iconButton}
-              aria-label="Search"
-            >
-              <SearchIcon />
-            </IconButton>
-            <Divider className={classes.divider} />
-            <IconButton
-              id="myP"
-              color="primary"
-              className={classes.iconButton}
-              aria-label="Directions"
-              onClick={this.handleMyPClick}
-            >
-              <DirectionsIcon />
-              <Typography variant="caption" display="block">
-                내위치
-              </Typography>
-            </IconButton>
-          </Grid>
+        <Grid item xs={12}>
+          <IconButton
+            id="searchBtn"
+            onClick={this.openSearchDialog}
+            className={classes.iconButton}
+            aria-label="Search"
+          >
+            <AddIcon />
+          </IconButton>
         </Grid>
         <Dialog
           id="dialog"
@@ -217,38 +184,55 @@ class SearchBar extends React.Component {
           aria-labelledby="customized-dialog-title"
           open={searchDialog}
         >
-          <AppBar position="relative">
-            <Toolbar>
-              <Typography variant="h6" flex={1}>
-                장소 검색
-              </Typography>
-              <IconButton edge="end" color="primary" onClick={this.handleClose} aria-label="Close">
-                <CloseIcon />
+          <Grid
+            container
+            direction="row"
+            justify="space-evenly"
+            alignItems="flex-end"
+          >
+            <ThemeProvider theme={theme}>
+              <TextField
+                className={classes.margin}
+                label="ThemeProvider"
+                variant="outlined"
+                id="mui-theme-provider-outlined-input"
+              />
+            </ThemeProvider>
+            <Grid item xs={12}>
+              <IconButton className={classes.iconButton} aria-label="Menu">
+                <MenuIcon />
               </IconButton>
-            </Toolbar>
-          </AppBar>
-          <List>
-            {results.map(value => (
-              <ListItem button onClick={e => this.handleSearchResult(value, e)} key={value.index}>
-                <ListItemText
-                  primary={value.place_name}
-                  // secondary={value.address_name}{value.road_address_name}
-                  secondary={(
-                    <React.Fragment>
-                      <Typography
-                        variant="body2"
-                        className={classes.inline}
-                        color="textPrimary"
-                      >
-                        {value.address_name}
-                      </Typography>
-                      {/* {`\n${value.road_address_name}`} */}
-                    </React.Fragment>
-                  )}
-                />
-              </ListItem>
-            ))}
-          </List>
+              <InputBase
+                id="standard-search"
+                value={addr}
+                onChange={this.handleChange}
+                className={classes.input}
+                placeholder="장소를 검색하세요!"
+                inputProps={{ 'aria-label': '장소를 검색하세요!' }}
+              />
+              <IconButton
+                id="searchBtn"
+                onClick={this.handleBtnClick}
+                className={classes.iconButton}
+                aria-label="Search"
+              >
+                <SearchIcon />
+              </IconButton>
+              <Divider className={classes.divider} />
+              <IconButton
+                id="myP"
+                color="primary"
+                className={classes.iconButton}
+                aria-label="Directions"
+                onClick={this.handleMyPClick}
+              >
+                <DirectionsIcon />
+                <Typography variant="caption" display="block">
+                  내위치
+                </Typography>
+              </IconButton>
+            </Grid>
+          </Grid>
         </Dialog>
       </div>
     );
