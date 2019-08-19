@@ -2,12 +2,16 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Container from '@material-ui/core/Container';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import Button from '@material-ui/core/Button';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import { withStyles } from '@material-ui/styles';
 import { getFireDB } from './shared/firebase';
+import ManduroImage from './images/manduro.png';
 
 const styles = theme => ({
   root: {
@@ -27,15 +31,58 @@ const styles = theme => ({
     transform: 'translate(0, -50%)',
     width: '100%',
   },
+  manduroBox: {
+    backgroundImage: `url(${ManduroImage})`,
+    height: '500px',
+    backgroundSize: 'contain',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+    position: 'relative',
+  },
+  centerText: {
+    position: 'absolute',
+    bottom: '42%',
+    right: '50%',
+    transform: 'translate(50%, 50%)',
+    width: '300px',
+  },
+  centerButton: {
+    position: 'absolute',
+    bottom: '40%',
+    right: '50%',
+    transform: 'translate(50%, 50%)',
+    padding: '5px 10px',
+  },
+  centerProgress: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    zIndex: 100,
+  },
+  title: {
+    flexGrow: 1,
+  },
+  colorGrey: {
+    color: theme.palette.grey[700],
+    backgroundColor: 'transparent',
+  },
 });
 
 class Main extends React.Component {
+  state = {
+    circularProgress: false,
+  }
+
   static propTypes = {
     classes: PropTypes.object.isRequired,
     history: PropTypes.object.isRequired,
   }
 
-  componentDidMount() {
+  handleClick = () => {
+    this.setState({
+      circularProgress: true,
+    });
     if (navigator.geolocation) {
       // GeoLocation을 이용해서 접속 위치를 얻어옵니다
       navigator.geolocation.getCurrentPosition(
@@ -52,7 +99,7 @@ class Main extends React.Component {
       // 일단 카카오 본사로 찍고 스팟 보냄
       this.goSpotPage(33.450701, 126.570667);
     }
-  }
+  };
 
   goSpotPage = (lat, lon) => {
     getFireDB().ref().push({ master: { lat, lon } })
@@ -69,9 +116,20 @@ class Main extends React.Component {
 
   render() {
     const { classes } = this.props;
+    const { circularProgress } = this.state;
     return (
       <Typography component="div">
+        {
+          circularProgress && <Box className={classes.centerProgress}><CircularProgress color="primary" /></Box>
+        }
         <Container fixed>
+          <AppBar position="fixed">
+            <Toolbar>
+              <Typography variant="h6" className={classes.title}>
+                야만나
+              </Typography>
+            </Toolbar>
+          </AppBar>
           <div>
             <Grid
               container
@@ -83,12 +141,17 @@ class Main extends React.Component {
             >
               <Grid item xs={12}>
                 <Paper elevation={0} className={classes.paper}>
-                  <CircularProgress color="primary" />
-                </Paper>
-              </Grid>
-              <Grid item xs={12}>
-                <Paper elevation={0} className={classes.paper}>
-                  <Box>SPOT 생성 중입니다...</Box>
+                  <Box className={classes.manduroBox}>
+                    <Typography variant="h2" gutterBottom className={classes.centerText} onClick={this.handleClick}>
+                      <Box>
+                        야
+                        <Paper elevation={0} className={classes.colorGrey}>
+                          중간에서
+                        </Paper>
+                        만나
+                      </Box>
+                    </Typography>
+                  </Box>
                 </Paper>
               </Grid>
             </Grid>
