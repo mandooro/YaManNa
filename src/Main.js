@@ -10,9 +10,18 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import { withStyles } from '@material-ui/styles';
-import { getFireDB } from './shared/firebase';
-import ManduroImage from './images/manduro.png';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import ListItemText from '@material-ui/core/ListItemText';
+import IconButton from '@material-ui/core/IconButton';
+import SubwayIcon from '@material-ui/icons/Subway';
+import Chip from '@material-ui/core/Chip';
+import Divider from '@material-ui/core/Divider';
 import SearchBar from './SearchBar2';
+import ManduroImage from './images/manduro.png';
+import { getFireDB } from './shared/firebase';
+
 
 const styles = theme => ({
   root: {
@@ -26,8 +35,9 @@ const styles = theme => ({
     padding: 0,
   },
   paper: {
-    padding: theme.spacing(1),
-    textAlign: 'center',
+    marginTop: theme.spacing(2),
+    paddingLeft: theme.spacing(2),
+    textAlign: 'left',
     color: theme.palette.primary.main,
   },
   center: {
@@ -67,17 +77,41 @@ const styles = theme => ({
   },
   title: {
     flexGrow: 1,
+    textAlign: 'center',
   },
   colorGrey: {
     color: theme.palette.grey[700],
     backgroundColor: 'transparent',
+  },
+  list: {
+    color: theme.palette.grey[700],
+    paddingLeft: theme.spacing(3),
+    paddingRight: theme.spacing(3),
+  },
+  icon: {
+    color: theme.palette.primary.main,
+  },
+  chip: {
+    marginRight: theme.spacing(1),
+    marginLeft: theme.spacing(1),
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    wordWrap: 'normal',
+    maxWidth: '200px',
+    overflow: 'hidden',
+  },
+  button: {
+    width: '100%',
+    position: 'fixed',
+    bottom: '0px',
+    fontSize: '20px',
   },
 });
 
 class Main extends React.Component {
   state = {
     circularProgress: false,
-    searchDialog: false,
+    members: [{ name: '이윤규', place: '서울특별시 송파구 잠실동 204-5' }, { name: '임해인', place: '서울특별시 송파구 잠실동 204-5' }],
   }
 
   static propTypes = {
@@ -120,15 +154,13 @@ class Main extends React.Component {
       });
   };
 
-  openDialaog = () => {
-    this.setState({
-      searchDialog: true,
-    });
+  goSpot = () => {
+    alert('spot');
   }
 
   render() {
     const { classes } = this.props;
-    const { circularProgress } = this.state;
+    const { circularProgress, members } = this.state;
     return (
       <Typography component="div">
         {
@@ -145,14 +177,14 @@ class Main extends React.Component {
           <div>
             <Grid
               container
-              spacing={4}
+              spacing={1}
               direction="row"
               justify="center"
               alignItems="center"
             >
               <Grid item xs={12}>
                 <Paper elevation={0} className={classes.paper}>
-                  <Typography variant="h2" gutterBottom onClick={this.handleClick}>
+                  <Typography variant="h3" gutterBottom>
                     <Box>
                       야
                       <Paper elevation={0} className={classes.colorGrey}>
@@ -164,10 +196,29 @@ class Main extends React.Component {
                 </Paper>
               </Grid>
               <Grid item xs={12} onClick={this.openDialaog}>
+                <List className={classes.list}>
+                  {members.map((value, i) => (
+                    <ListItem key={i.toString()} dense button>
+                      <Chip label={`${value.name}`} color="primary" className={classes.chip} />
+                      <Chip label={`${value.place}`} color="primary" variant="outlined" className={classes.chip} />
+                      <ListItemSecondaryAction>
+                        <IconButton edge="end" aria-label="comments">
+                          <SubwayIcon className={classes.icon} />
+                        </IconButton>
+                      </ListItemSecondaryAction>
+                    </ListItem>
+                  ))}
+                </List>
+              </Grid>
+              <Grid item xs={12}><Divider /></Grid>
+              <Grid item xs={12} onClick={this.openDialaog} className={classes.title}>
                 <SearchBar />
               </Grid>
             </Grid>
           </div>
+          <Button variant="contained" color="primary" className={classes.button} onClick={this.goSpot}>
+            중간 지점 찾기
+          </Button>
         </Container>
       </Typography>
     );
