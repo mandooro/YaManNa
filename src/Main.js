@@ -13,11 +13,11 @@ import { withStyles } from '@material-ui/styles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import ListItemText from '@material-ui/core/ListItemText';
 import IconButton from '@material-ui/core/IconButton';
 import SubwayIcon from '@material-ui/icons/Subway';
 import Chip from '@material-ui/core/Chip';
 import Divider from '@material-ui/core/Divider';
+import DeleteIcon from '@material-ui/icons/Delete';
 import SearchBar from './SearchBar2';
 import ManduroImage from './images/manduro.png';
 import { getFireDB } from './shared/firebase';
@@ -111,7 +111,14 @@ const styles = theme => ({
 class Main extends React.Component {
   state = {
     circularProgress: false,
-    members: [{ name: '이윤규', place: '서울특별시 송파구 잠실동 204-5' }, { name: '임해인', place: '서울특별시 송파구 잠실동 204-5' }],
+    members: [
+      {
+        name: '이윤규', place_name: '고려대학교 서울캠퍼스', address_name: '서울특별시 송파구 잠실동 204-5', x: '127.031685000726', y: '37.5898422803883',
+      },
+      {
+        name: '임해인', address_name: '서울 동대문구 제기동 148-6', x: '127.03103903252514', y: '37.58298409427197',
+      },
+    ],
   }
 
   static propTypes = {
@@ -155,7 +162,24 @@ class Main extends React.Component {
   };
 
   goSpot = () => {
-    alert('spot');
+    const { history } = this.props;
+    const { members } = this.state;
+    if (members.length > 0) {
+      const xs = members.map(v => v.x).reduce((p, v) => `${p},${v}`);
+      const ys = members.map(v => v.y).reduce((p, v) => `${p},${v}`);
+      const placeNames = members.map(v => (v.place_name ? v.place_name : v.address_name)).reduce((p, v) => `${p},${v}`);
+      const names = members.map(v => v.name).reduce((p, v) => `${p},${v}`);
+      history.push(`/spot?x=${xs}&y=${ys}&place=${placeNames}&name=${names}`);
+    } else {
+      alert('적어도 한명 이상의 멤버를 설정해주세요!');
+    }
+  }
+
+  deleteItem = (i) => {
+    const { members } = this.state;
+    this.setState({
+      members: members.filter((v, index) => i !== index),
+    });
   }
 
   render() {
@@ -197,17 +221,23 @@ class Main extends React.Component {
               </Grid>
               <Grid item xs={12} onClick={this.openDialaog}>
                 <List className={classes.list}>
-                  {members.map((value, i) => (
-                    <ListItem key={i.toString()} dense button>
-                      <Chip label={`${value.name}`} color="primary" className={classes.chip} />
-                      <Chip label={`${value.place}`} color="primary" variant="outlined" className={classes.chip} />
-                      <ListItemSecondaryAction>
-                        <IconButton edge="end" aria-label="comments">
-                          <SubwayIcon className={classes.icon} />
-                        </IconButton>
-                      </ListItemSecondaryAction>
-                    </ListItem>
-                  ))}
+                  {members.map((value, i) => {
+                    const place = value.place_name ? value.place_name : value.address_name;
+                    return (
+                      <ListItem key={i.toString()} dense button>
+                        <Chip label={`${value.name}`} color="primary" className={classes.chip} />
+                        <Chip label={`${place}`} color="primary" variant="outlined" className={classes.chip} />
+                        <ListItemSecondaryAction>
+                          <IconButton edge="end" aria-label="subway">
+                            <SubwayIcon className={classes.icon} />
+                          </IconButton>
+                          <IconButton edge="end" aria-label="subway" onClick={() => this.deleteItem(i)}>
+                            <DeleteIcon />
+                          </IconButton>
+                        </ListItemSecondaryAction>
+                      </ListItem>
+                    );
+                  })}
                 </List>
               </Grid>
               <Grid item xs={12}><Divider /></Grid>
