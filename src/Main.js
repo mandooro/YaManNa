@@ -12,6 +12,7 @@ import Box from '@material-ui/core/Box';
 import { withStyles } from '@material-ui/styles';
 import { getFireDB } from './shared/firebase';
 import ManduroImage from './images/manduro.png';
+import SearchBar from './SearchBar2';
 
 const styles = theme => ({
   root: {
@@ -19,6 +20,10 @@ const styles = theme => ({
     color: 'white',
     width: '100%',
     height: '100%',
+  },
+  marginPaddingZero: {
+    margin: 0,
+    padding: 0,
   },
   paper: {
     padding: theme.spacing(1),
@@ -72,6 +77,7 @@ const styles = theme => ({
 class Main extends React.Component {
   state = {
     circularProgress: false,
+    searchDialog: false,
   }
 
   static propTypes = {
@@ -114,6 +120,12 @@ class Main extends React.Component {
       });
   };
 
+  openDialaog = () => {
+    this.setState({
+      searchDialog: true,
+    });
+  }
+
   render() {
     const { classes } = this.props;
     const { circularProgress } = this.state;
@@ -122,8 +134,8 @@ class Main extends React.Component {
         {
           circularProgress && <Box className={classes.centerProgress}><CircularProgress color="primary" /></Box>
         }
-        <Container fixed>
-          <AppBar position="fixed">
+        <Container fixed className={classes.marginPaddingZero}>
+          <AppBar position="static">
             <Toolbar>
               <Typography variant="h6" className={classes.title}>
                 야만나
@@ -137,22 +149,22 @@ class Main extends React.Component {
               direction="row"
               justify="center"
               alignItems="center"
-              className={classes.center}
             >
               <Grid item xs={12}>
                 <Paper elevation={0} className={classes.paper}>
-                  <Box className={classes.manduroBox}>
-                    <Typography variant="h2" gutterBottom className={classes.centerText} onClick={this.handleClick}>
-                      <Box>
-                        야
-                        <Paper elevation={0} className={classes.colorGrey}>
-                          중간에서
-                        </Paper>
-                        만나
-                      </Box>
-                    </Typography>
-                  </Box>
+                  <Typography variant="h2" gutterBottom onClick={this.handleClick}>
+                    <Box>
+                      야
+                      <Paper elevation={0} className={classes.colorGrey}>
+                        중간에서
+                      </Paper>
+                      만나
+                    </Box>
+                  </Typography>
                 </Paper>
+              </Grid>
+              <Grid item xs={12} onClick={this.openDialaog}>
+                <SearchBar />
               </Grid>
             </Grid>
           </div>
