@@ -1,11 +1,46 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "야만나",
+  "name": "중간거리 찾기 야만나",
   "icons": [
     {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "src": "dumpling.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "dumpling256.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    },
+    {
+      "src": "dumpling192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "dumpling128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "dumpling64.png",
+      "sizes": "64x64",
+      "type": "image/png"
+    },
+    {
+      "src": "dumpling32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "dumpling24.png",
+      "sizes": "24x24",
+      "type": "image/png"
+    },
+    {
+      "src": "dumpling16.png",
+      "sizes": "16x16",
+      "type": "image/png"
     }
   ],
   "start_url": ".",
