@@ -14,8 +14,13 @@ import Button from '@material-ui/core/Button';
 import Select from '@material-ui/core/Select';
 import queryString from 'query-string';
 import { getCenter, basicCenterAlorithm } from './lib/utils';
+import Toolbar from "@material-ui/core/Toolbar/Toolbar";
 
 const styles = theme => ({
+  title: {
+    flexGrow: 1,
+    textAlign: 'center',
+  },
   root: {
     flexGrow: 1,
     color: 'white',
@@ -177,10 +182,11 @@ class MapPage extends React.Component {
     categorymarkers.forEach(v => v.setMap(null));
     const bounds = new window.kakao.maps.LatLngBounds();
     markers.forEach(v => bounds.extend(v.getPosition()));
+    console.log(data)
     const overlayArr = data.filter((v, i) => i < searchSize)
       .map((v) => {
         // 커스텀 오버레이가 표시될 위치입니다
-        const content = `<div class ="label" style="color: #ff0000; background-color: white; padding: 5px; border: 1px solid #ff0000; border-radius: 30px;"><span class="left"></span><span class="center">${v.place_name}</span><span class="right"></span></div>`;
+        const content = `<a href=${v.place_url} style="text-decoration:none" target="_blank"><div class ="label" style="color: #ff0000; background-color: white; padding: 5px; border: 1px solid #ff0000; border-radius: 30px;"><span class="left"></span><span class="center">${v.place_name}</span><span class="right"></span></div></a>`;
         const position = new window.kakao.maps.LatLng(v.y, v.x);
 
         bounds.extend(position);
@@ -270,7 +276,7 @@ class MapPage extends React.Component {
       <Typography component="div" className={classes.root}>
         <Container className={classes.root} p={0}>
           <Box width={1} height={1}>
-            <AppBar position="static" color="default">
+            <AppBar position="static" color="default" dense>
               <Tabs
                 value={categoryIndex}
                 onChange={this.handleChangeCategory}
@@ -293,7 +299,7 @@ class MapPage extends React.Component {
                     displayEmpty
                   >
                     {
-                      [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(v => (<option value={v} key={`${v}select`}>{v}개 검색</option>))
+                      [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(v => (<option value={v} key={`${v}select`}>주변 {v}개</option>))
                     }
                   </Select>
                 </Grid>

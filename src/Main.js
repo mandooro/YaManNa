@@ -15,9 +15,10 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import IconButton from '@material-ui/core/IconButton';
 import SubwayIcon from '@material-ui/icons/Subway';
+import FaceIcon from '@material-ui/icons/Face';
 import Chip from '@material-ui/core/Chip';
 import Divider from '@material-ui/core/Divider';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@material-ui/icons/Cancel';
 import queryString from 'query-string';
 import SearchBar from './SearchBar2';
 import ManduroImage from './images/manduro.png';
@@ -76,6 +77,10 @@ const styles = theme => ({
     zIndex: 100,
   },
   title: {
+    flexGrow: 1,
+    textAlign: 'center',
+  },
+  titleMargin: {
     flexGrow: 1,
     textAlign: 'center',
     marginTop: theme.spacing(2)
@@ -223,7 +228,7 @@ class Main extends React.Component {
                     const place = value.place_name ? value.place_name : value.address_name;
                     return (
                       <ListItem key={i.toString()} dense button>
-                        <Chip label={`${value.name}`} color="primary" className={classes.chip} />
+                        <Chip icon={<FaceIcon />} label={`${value.name}`} color="primary" className={classes.chip} />
                         <Chip label={`${place}`} color="primary" variant="outlined" className={classes.chip} />
                         <ListItemSecondaryAction>
                           <IconButton edge="end" aria-label="subway" onClick={() => this.deleteItem(i)}>
@@ -236,7 +241,7 @@ class Main extends React.Component {
                 </List>
               </Grid>
               <Grid item xs={12}><Divider /></Grid>
-              <Grid item xs={12} onClick={this.openDialaog} className={classes.title}>
+              <Grid item xs={12} onClick={this.openDialaog} className={classes.titleMargin}>
                 <SearchBar addList={item => this.addList(item)} memberLen={members.length + 1} />
               </Grid>
             </Grid>

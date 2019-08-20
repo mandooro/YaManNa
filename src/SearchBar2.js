@@ -13,6 +13,7 @@ import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
 import DirectionsIcon from '@material-ui/icons/Directions';
+import MyLocation from '@material-ui/icons/MyLocation';
 import PropTypes from 'prop-types';
 import Button from '@material-ui/core/Button/Button';
 
@@ -35,6 +36,10 @@ const styles = theme => ({
     flex: 1,
   },
   iconButton: {
+    padding: 10,
+  },
+  iconButton3: {
+    paddingBottom: 0,
     padding: 10,
   },
   divider: {
@@ -105,7 +110,7 @@ class SearchBar extends React.Component {
           const lon = position.coords.longitude; // 경도
           const { addList, memberLen } = this.props;
           let { name } = this.state;
-          if (name.length === 0) name = `참석자${memberLen}`;
+          if (name.length === 0) name = '나';
           addList({
             name,
             x: lon,
@@ -215,22 +220,31 @@ class SearchBar extends React.Component {
             justify="space-evenly"
             alignItems="flex-end"
           >
-            <TextField
-              id="outlined-dense"
-              label="참석자 이름"
-              className={clsx(classes.textField, classes.dense)}
-              onChange={this.handleNameChange}
-              margin="dense"
-              variant="outlined"
-            />
+            <Grid item xs={12} className={classes.root}>
+              <TextField
+                id="outlined-dense"
+                label="참석자 이름"
+                className={clsx(classes.textField, classes.dense)}
+                onChange={this.handleNameChange}
+                margin="dense"
+                variant="outlined"
+              />
+              <IconButton
+                className={classes.iconButton3}
+                aria-label="Directions"
+                onClick={this.handleMyPClick}
+              >
+                <MyLocation color="primary" />
+              </IconButton>
+            </Grid>
             <Grid item xs={12} className={classes.root}>
               <InputBase
                 id="standard-search"
                 value={addr}
                 onChange={this.handleChange}
                 className={classes.input}
-                placeholder="출발 장소를 검색하세요!"
-                inputProps={{ 'aria-label': '출발 장소를 검색하세요!' }}
+                placeholder="어디서 출발하시나요?"
+                inputProps={{ 'aria-label': '어디서 출발하시나요?' }}
                 onKeyPress={(event) => {
                   if (event.key === 'Enter') {
                     this.handleBtnClick();
@@ -241,19 +255,10 @@ class SearchBar extends React.Component {
                 id="searchBtn"
                 onClick={this.handleBtnClick}
                 className={classes.iconButton}
+                color="primary"
                 aria-label="Search"
               >
                 <SearchIcon />
-              </IconButton>
-              <Divider className={classes.divider} />
-              <IconButton
-                id="myP"
-                color="primary"
-                className={classes.iconButton}
-                aria-label="Directions"
-                onClick={this.handleMyPClick}
-              >
-                <DirectionsIcon />
               </IconButton>
             </Grid>
           </Grid>
