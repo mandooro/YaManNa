@@ -12,9 +12,9 @@ import InputBase from '@material-ui/core/InputBase';
 import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
-import AddIcon from '@material-ui/icons/Add';
 import DirectionsIcon from '@material-ui/icons/Directions';
 import PropTypes from 'prop-types';
+import Button from '@material-ui/core/Button/Button';
 
 const styles = theme => ({
   root: {
@@ -199,14 +199,9 @@ class SearchBar extends React.Component {
     return (
       <div>
         <Grid item xs={12}>
-          <IconButton
-            id="searchBtn"
-            onClick={this.openSearchDialog}
-            className={classes.iconButton}
-            aria-label="Search"
-          >
-            <AddIcon />
-          </IconButton>
+          <Button variant="outlined" color="primary" onClick={this.openSearchDialog} >
+            만날 사람들을 추가해주세요!
+          </Button>
         </Grid>
         <Dialog
           id="dialog"
@@ -234,8 +229,8 @@ class SearchBar extends React.Component {
                 value={addr}
                 onChange={this.handleChange}
                 className={classes.input}
-                placeholder="장소를 검색하세요!"
-                inputProps={{ 'aria-label': '장소를 검색하세요!' }}
+                placeholder="출발 장소를 검색하세요!"
+                inputProps={{ 'aria-label': '출발 장소를 검색하세요!' }}
                 onKeyPress={(event) => {
                   if (event.key === 'Enter') {
                     this.handleBtnClick();

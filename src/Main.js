@@ -78,6 +78,7 @@ const styles = theme => ({
   title: {
     flexGrow: 1,
     textAlign: 'center',
+    marginTop: theme.spacing(2)
   },
   colorGrey: {
     color: theme.palette.grey[700],
@@ -216,16 +217,6 @@ class Main extends React.Component {
                   </Typography>
                 </Paper>
               </Grid>
-              <Grid item xs={12}><Divider /></Grid>
-              {
-                members.length === 0 ? (
-                  <Grid item xs={12} className={classes.emptyButton}>
-                    <Button variant="outlined" color="primary">
-                      만날 사람들을 추가해주세요!
-                    </Button>
-                  </Grid>
-                ) : ''
-              }
               <Grid item xs={12} onClick={this.openDialaog}>
                 <List className={classes.list}>
                   {members.map((value, i) => {
