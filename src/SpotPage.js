@@ -5,17 +5,15 @@ import Container from '@material-ui/core/Container';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import { withStyles } from '@material-ui/styles';
-import Icon from '@material-ui/core/Icon';
-import HelpOutlinedIcon from '@material-ui/icons/HelpOutlined';
-import Dialog from '@material-ui/core/Dialog';
-import IconButton from '@material-ui/core/IconButton';
-import CloseIcon from '@material-ui/icons/Close';
-import Toolbar from '@material-ui/core/Toolbar';
-import { getFireDB } from './shared/firebase';
+import AppBar from '@material-ui/core/AppBar';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+import Grid from '@material-ui/core/Grid';
+import Chip from '@material-ui/core/Chip';
+import Button from '@material-ui/core/Button';
+import Select from '@material-ui/core/Select';
+import queryString from 'query-string';
 import { getCenter, basicCenterAlorithm } from './lib/utils';
-import SearchBar from './SearchBar';
-import Helper from './Helper';
-import SubwayImage from './icons/location-pin.png';
 
 const styles = theme => ({
   root: {
@@ -43,24 +41,71 @@ const styles = theme => ({
     zIndex: '10',
     padding: 10,
   },
+  slider: {
+    paddingLeft: theme.spacing(2),
+    paddingRight: theme.spacing(2),
+  },
+  button: {
+    marginBottom: theme.spacing(1),
+    padding: theme.spacing(1),
+  },
+  returnButton: {
+    position: 'fixed',
+    left: '20px',
+    bottom: '10px',
+    zIndex: '10',
+  },
 });
 
 class MapPage extends React.Component {
   state = {
     // 마커를 배열에 넣고 사용할 예정
     markers: [],
-    centerMarker: null,
-    helper: false,
-    subwayMarkers: [],
     map: null,
-    subwayInfos: [],
-    markersLen: 0,
+    categorymarkers: [],
     bounds: null,
+    categoryCode: [
+      {
+        value: '지하철',
+        code: 'SW8',
+      },
+      {
+        value: '카페',
+        code: 'CE7',
+      },
+      {
+        value: '음식점',
+        code: 'FD6',
+      },
+      {
+        value: '문화시설',
+        code: 'CT1',
+      },
+      {
+        value: '편의점',
+        code: 'CS2',
+      },
+      {
+        value: '대형마트',
+        code: 'MT1',
+      },
+      {
+        value: '주차장',
+        code: 'PK6',
+      },
+      {
+        value: '숙박',
+        code: 'AD5',
+      }],
+    categoryIndex: 0,
+    searchSize: 1,
+    findRoad: 0,
   }
 
   static propTypes = {
     classes: PropTypes.object.isRequired,
-    match: PropTypes.object.isRequired,
+    location: PropTypes.object.isRequired,
+    history: PropTypes.object.isRequired,
   }
 
   async componentDidMount() {
@@ -73,282 +118,206 @@ class MapPage extends React.Component {
     this.setState({
       map,
     });
-    const { match: { params } } = this.props;
-    // 위치설정을 허용한 경우
-    if (navigator.geolocation) {
-      // GeoLocation을 이용해서 접속 위치를 얻어옵니다
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const lat = position.coords.latitude; // 위도
-          const lon = position.coords.longitude; // 경도
-          if (!window.localStorage.getItem(params.id)) { // 처음 들어왔으면?
-            this.addMyMarker(lat, lon);
-          }
-        },
-        (err) => {
-          console.warn(`ERROR(${err.code}): ${err.message}`);
-        },
-      );
-    } else { // HTML5의 GeoLocation을 사용할 수 없을때 마커 표시 위치와 인포윈도우 내용을 설정합니다
-      // TODO 위치허용 안하면 어떡하지?
+    const { location: { search } } = this.props;
+    const parsedQuery = queryString.parse(search);
+    const name = parsedQuery.name.split(',');
+    const place = parsedQuery.place.split(',');
+    const x = parsedQuery.x.split(',');
+    const y = parsedQuery.y.split(',');
+
+    const arrLen = name.length;
+    const pointArr = [];
+    for (let i = 0; i < arrLen; i += 1) {
+      const obj = {
+        name: name[i],
+        place: place[i],
+        x: x[i],
+        y: y[i],
+      };
+      pointArr.push(obj);
     }
 
-    // 데이터 읽고, 마커 추가하는 부분
-    const starCountRef = await getFireDB().ref(params.id);
-    starCountRef.on('child_added', (data) => {
-      this.addMarker(map, data.val().lat, data.val().lon, data.key);
+    this.setMarkers(pointArr);
+  }
+
+  setMarkers = (pointArr) => {
+    const { map, categoryCode } = this.state;
+
+    const markers = pointArr.map((v) => {
+      const lat = v.y;
+      const lon = v.x;
+      const content = `<div class ="label" style="color: #484d8b; background-color: white; padding: 5px; border: 1px solid #484d8b; border-radius: 30px;"><span class="left"></span><span class="center">${v.name}</span><span class="right"></span></div>`;
+      const pointPosition = new window.kakao.maps.LatLng(lat, lon);
+      const point = new window.kakao.maps.CustomOverlay({
+        map, // 마커를 표시할 지도
+        position: pointPosition, // 마커를 표시할 위치
+        content, // 마커의 타이틀, 마커에 마우스를 올리면 타이틀이 표시됩니다
+      });
+      return point;
     });
 
-    // 데이터가 삭제됐을시, 읽고 마커 지우는 부분
-    starCountRef.on('child_removed', (data) => {
-      this.delMarker(map, data.key);
+    const newBounds = new window.kakao.maps.LatLngBounds();
+    this.setState({
+      bounds: newBounds,
+    });
+    markers.forEach(mark => newBounds.extend(mark.getPosition()));
+    map.setBounds(newBounds);
+
+    this.setState({
+      markers,
+    });
+
+    this.setCenterMarker(categoryCode[0].code);
+  }
+
+  addCategoryMarker = (data) => {
+    const {
+      map, categorymarkers, markers, searchSize,
+    } = this.state;
+    categorymarkers.forEach(v => v.setMap(null));
+    const bounds = new window.kakao.maps.LatLngBounds();
+    markers.forEach(v => bounds.extend(v.getPosition()));
+    const overlayArr = data.filter((v, i) => i < searchSize)
+      .map((v) => {
+        // 커스텀 오버레이가 표시될 위치입니다
+        const content = `<div class ="label" style="color: #ff0000; background-color: white; padding: 5px; border: 1px solid #ff0000; border-radius: 30px;"><span class="left"></span><span class="center">${v.place_name}</span><span class="right"></span></div>`;
+        const position = new window.kakao.maps.LatLng(v.y, v.x);
+
+        bounds.extend(position);
+        // 커스텀 오버레이를 생성합니다
+        return new window.kakao.maps.CustomOverlay({
+          position,
+          content,
+          map,
+        });
+      });
+    map.setBounds(bounds);
+    this.setState({
+      categorymarkers: overlayArr,
+      bounds,
     });
   }
 
-  getNearPlace = async (location, markers) => {
-    const places = await new window.kakao.maps.services.Places();
+  handleChangeCategory = (e, i) => {
+    const { categoryCode } = this.state;
+    this.setState({
+      categoryIndex: i,
+      findRoad: 0,
+    });
+    this.setCenterMarker(categoryCode[i].code);
+  }
+
+  handleSizeChange = (e) => {
+    const { categoryCode, categoryIndex } = this.state;
+    this.setState({
+      searchSize: e.target.value,
+    });
+    this.setCenterMarker(categoryCode[categoryIndex].code);
+  }
+
+  setCenterMarker = (code) => {
+    const { markers } = this.state;
 
     const callback = (data, status, pagination) => {
       if (status === window.kakao.maps.services.Status.OK) {
-        // console.log(data);
-        const { map, markersLen } = this.state;
-        if (markers.length >= markersLen) {
-          this.addSubwayMarker(map, data);
-        }
+        this.addCategoryMarker(data);
         return data;
       }
       return null;
     };
 
-    places.categorySearch('SW8', callback, {
-      location,
-      radius: 5000,
-    });
-  }
-
-  addSubwayMarker = async (map, data) => {
-    const { subwayMarkers, subwayInfos, bounds } = this.state;
-    subwayMarkers.forEach((marker) => { marker.setMap(null); });
-    // console.log(subwayInfos);
-    subwayInfos.forEach((info) => { info.close(); });
-    // 마커 이미지의 이미지 크기와 이미지 입니다
-    const imageSize = new window.kakao.maps.Size(30, 30);
-    // TODO 마커 이미지 어떡하지? 엑스자 표시같은거 좋을듯 원피스 보물처럼
-    const imageSrc = SubwayImage;
-    // 마커 이미지를 생성합니다
-    const markerImage = new window.kakao.maps.MarkerImage(imageSrc, imageSize);
-    const markers = await Promise.all(
-      data.filter((v, i) => i < 1 && true)
-        .map(v => new window.kakao.maps.Marker({
-          map, // 마커를 표시할 지도
-          position: new window.kakao.maps.LatLng(v.y, v.x), // 마커를 표시할 위치
-          title: v.place_name, // 마커의 타이틀, 마커에 마우스를 올리면 타이틀이 표시됩니다
-          image: markerImage, // 마커 이미지
-        })),
-    );
-    this.setState({
-      subwayMarkers: markers,
-    });
-    const infowindows = await Promise.all(markers.map(async (marker) => {
-      const address = await this.getMyPointAddress();
-      const addressX = address !== null ? address.getX() : '';
-      const addressY = address !== null ? address.getY() : '';
-      const iwContent = `<div><a href="https://m.map.kakao.com/actions/publicRoute?startLoc=내 위치&sx=${addressX}&sy=${addressY}&endLoc=${marker.getTitle()}&ex=${marker.getPosition().toCoords().getX()}&ey=${marker.getPosition().toCoords().getY()}&ids=,&service=" style="color:blue" target="_blank">${marker.getTitle().split(' ')[0]}까지 길찾기</a></div>`;
-      // 인포윈도우를 생성합니다
-      const infowindow = await new window.kakao.maps.InfoWindow({
-        content: iwContent,
-      });
-      // 마커 위에 인포윈도우를 표시합니다. 두번째 파라미터인 marker를 넣어주지 않으면 지도 위에 표시됩니다
-      infowindow.open(map, marker);
-      if(bounds !== null) bounds.extend(marker.getPosition());
-      map.setBounds(bounds);
-      return infowindow;
-    }));
-
-    this.setState({
-      subwayInfos: infowindows,
-    });
-  }
-
-  getMyPointAddress = async () => {
-    const myMarker = await this.getMyMarker();
-    if (myMarker !== undefined) {
-      const coord = myMarker.getPosition().toCoords();
-      return coord;
-    }
-    return null;
-  }
-
-  addMyMarker = async (lat, lon) => {
-    const myMarkerPosition = new window.kakao.maps.LatLng(lat, lon);
-    const { match: { params } } = this.props;
-    await this.delMyMarker();
-    getFireDB().ref().child(params.id).push({ lat, lon })
-      .then((result) => {
-        const { key } = result;
-        window.localStorage.setItem(params.id, key);
-        this.setState(
-          {
-            myMarker:
-              {
-                keyValue: window.localStorage.getItem(params.id),
-                position: myMarkerPosition,
-              },
-          },
-        ); // 내 마커위치 기억
-      })
-      .catch((e) => {
-        console.log(e);
-      });
-  }
-
-  delMyMarker = () => {
-    const { match: { params } } = this.props;
-    const { id } = params;
-    const myMarker = this.getMyMarker();
-    if (myMarker !== null) {
-      // console.log(myMarker)
-      const key = myMarker.getTitle();
-      getFireDB().ref(id).child(key).remove();
-    }
-  }
-
-  getMyMarker = () => {
-    const { markers } = this.state;
-    const { match: { params } } = this.props;
-    const id = window.localStorage.getItem(params.id)
-    const rMarkers = markers.map(v => v);
-    const myMarker = rMarkers.find(v => (id === v.getTitle()));
-    return myMarker;
-  }
-
-  addMarker = async (map, lat, lon, key) => {
-    // 각자 위치의 마커를 생성하는 부분
-    // 마커를 생성합니다
-    const jumPosition = await new window.kakao.maps.LatLng(lat, lon);
-    const jum = await new window.kakao.maps.Marker({
-      map, // 마커를 표시할 지도
-      position: jumPosition, // 마커를 표시할 위치
-      title: key, // 마커의 타이틀, 마커에 마우스를 올리면 타이틀이 표시됩니다
-    });
-    // 마커를 나중에 지울 수 있도록 기억함
-    const { markers } = this.state;
-    const newMarkers = markers.concat(jum);
-    this.setState({
-      markers: newMarkers,
-    });
-    await this.displayCenterMarker(newMarkers);
-  }
-
-  delMarker = async (map, key) => {
-    const { markers } = this.state;
-    await markers.forEach(v => v.setMap(null));
-    const delMarkers = markers.filter(mark => mark.getTitle() !== key);
-    this.setState({
-      markers: delMarkers,
-    });
-    this.displayMarker(map);
-    await this.displayCenterMarker(map);
-  };
-
-  displayMarker = (map) => {
-    // 마커를 생성합니다
-    const { markers } = this.state;
-    markers.forEach(v => v.setMap(map));
-  };
-
-  displayCenterMarker = async (markers) => {
-    // 스테이트에서 변수 처리
-    const { map, centerMarker, markersLen } = this.state;
-    // 센터마크 초기화 부분
-    if (centerMarker != null) centerMarker.setMap(null);
-    if (markers.length > 0 && markersLen <= markers.length) {
-      this.setState({
-        markersLen: markers.length,
-      });
-      // 새로운 센터 위치 계산 로직
+    if (markers.length > 0) {
       const centerData = getCenter(markers, basicCenterAlorithm);
       const centerLat = centerData.lat;
       const centerLon = centerData.lon;
-      // 마커 이미지의 이미지 크기와 이미지 입니다
-      const imageSize = new window.kakao.maps.Size(40, 50);
-      // TODO 마커 이미지 어떡하지? 엑스자 표시같은거 좋을듯 원피스 보물처럼
-      const imageSrc = '//www.freepngimg.com/download/map/62663-vector-map-google-center-icons-maps-computer.png';
-      // 마커 이미지를 생성합니다
-      const markerImage = new window.kakao.maps.MarkerImage(imageSrc, imageSize);
-
       const center = new window.kakao.maps.LatLng(centerLat, centerLon);
-      const marker = new window.kakao.maps.Marker({
-        map: null, // 마커를 표시할 지도
-        position: center, // 마커를 표시할 위치
-        title: '여기가 중간', // 마커의 타이틀, 마커에 마우스를 올리면 타이틀이 표시됩니다
-        image: markerImage, // 마커 이미지
+      const places = new window.kakao.maps.services.Places();
+
+      places.categorySearch(code, callback, {
+        location: center,
+        radius: 5000,
       });
-      // 마커를 생성합니다
-      this.setState({ centerMarker: marker });
-      map.setCenter(center);
-      // 맵의 범위를 변경
-      // 지도의 범위 객체
-      const newBounds = new window.kakao.maps.LatLngBounds();
-      this.setState({
-        bounds: newBounds,
-      })
-      markers.forEach(mark => newBounds.extend(mark.getPosition()));
-      map.setBounds(newBounds);
-      await this.getNearPlace(center, markers);
     }
-  };
+  }
 
-  sendLink = () => {
-    const { match: { params } } = this.props;
-    const { id } = params;
-    window.Kakao.Link.sendDefault({
-      objectType: 'feed',
-      content: {
-        title: '중간 위치에서 만나세요',
-        description: '중간 위치를 찾아주는 중간 위치 앱!',
-        imageUrl: 'http://mblogthumb2.phinf.naver.net/MjAxODAxMDlfMTMx/MDAxNTE1NDkwNzAxNjQ5.TDRphYc2xTlO5JpsAZjYoXXQKZZvM-TciZN3F8CyBFMg.G2mOPygc54OQvtb3Y5fg_v3b_2AYX9ix4lvWAFY-sBsg.JPEG.jongmin963/Screenshot_20180109-160050.jpg?type=w800',
-        link: {
-          mobileWebUrl: `http://localhost:3000/spot/${id}`,
-          webUrl: `http://localhost:3000/spot/${id}`,
-        },
-      },
-    });
-  };
-
-  showHelper = () => {
+  handleFindRoadChange = (e) => {
     this.setState({
-      helper: true,
+      findRoad: e.target.value,
     });
   }
 
-  closeHelper = () => {
-    this.setState({
-      helper: false,
-    });
+  handlefindRoad = () => {
+    const { categorymarkers, findRoad } = this.state;
+    const destination = categorymarkers[findRoad];
+    const name = destination.getContent().replace(/(<([^>]+)>)/ig, '');
+    const y = destination.getPosition().getLat();
+    const x = destination.getPosition().getLng();
+    window.open(`https://map.kakao.com/link/to/${name},${y},${x}`);
+  }
+
+  returnMain = () => {
+    const { history } = this.props;
+    const { location: { search } } = this.props;
+    history.push(`/${search}`);
   }
 
   render() {
     const { classes } = this.props;
-    const { helper } = this.state;
+    const {
+      categoryIndex, categoryCode, searchSize, categorymarkers, findRoad
+    } = this.state;
     return (
       <Typography component="div" className={classes.root}>
         <Container className={classes.root} p={0}>
           <Box width={1} height={1}>
-            <SearchBar addMyMarker={(lat, lon) => this.addMyMarker(lat, lon)} />
+            <AppBar position="static" color="default">
+              <Tabs
+                value={categoryIndex}
+                onChange={this.handleChangeCategory}
+                indicatorColor="primary"
+                textColor="primary"
+                variant="scrollable"
+                scrollButtons="on"
+                aria-label="scrollable auto tabs example"
+              >
+                {
+                  categoryCode.map((v, i) => (<Tab label={v.value} key={`index${i.toString()}`} />))
+                }
+              </Tabs>
+              <Grid container spacing={2} className={classes.slider}>
+                <Grid item xs={4}>
+                  <Select
+                    native
+                    value={searchSize}
+                    onChange={this.handleSizeChange}
+                    displayEmpty
+                  >
+                    {
+                      [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(v => (<option value={v} key={`${v}select`}>{v}개 검색</option>))
+                    }
+                  </Select>
+                </Grid>
+                <Grid item xs={5}>
+                  <Select
+                    native
+                    value={findRoad}
+                    onChange={this.handleFindRoadChange}
+                    displayEmpty
+                  >
+                    {
+                      categorymarkers.map((v, i) => (<option value={i} key={`${i.toString()}select`}>{v.getContent().replace(/(<([^>]+)>)/ig, '')}</option>))
+                    }
+                  </Select>
+                </Grid>
+                <Grid item xs={3}>
+                  <Button className={classes.button} variant="contained" color="primary" onClick={this.handlefindRoad}>길찾기</Button>
+                </Grid>
+              </Grid>
+            </AppBar>
             <Box id="map" width={1} height={1} />
           </Box>
+          <Chip label="다시하기!" color="primary" className={classes.returnButton} onClick={this.returnMain} />
         </Container>
-        <HelpOutlinedIcon className={classes.icon2} onClick={this.showHelper} color="primary">help</HelpOutlinedIcon>
-        <Icon className={classes.icon} onClick={this.sendLink} color="primary" fontSize="large">share</Icon>
-        <Dialog fullScreen open={helper} onClose={this.closeHelper}>
-          <Toolbar>
-            <IconButton edge="end" color="inherit" onClick={this.closeHelper} aria-label="close">
-              <CloseIcon />
-            </IconButton>
-          </Toolbar>
-          <Helper />
-        </Dialog>
       </Typography>
     );
   }

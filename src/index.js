@@ -7,7 +7,6 @@ import { fire } from './shared/firebase';
 
 async function startApp() {
   await window.Kakao.init('79ca9d50ec5b44afee5b11a1c19903d1')
-  await fire();
   ReactDOM.render(<App />, document.getElementById('root'));
 }
 

@@ -18,9 +18,9 @@ import SubwayIcon from '@material-ui/icons/Subway';
 import Chip from '@material-ui/core/Chip';
 import Divider from '@material-ui/core/Divider';
 import DeleteIcon from '@material-ui/icons/Delete';
+import queryString from 'query-string';
 import SearchBar from './SearchBar2';
 import ManduroImage from './images/manduro.png';
-import { getFireDB } from './shared/firebase';
 
 
 const styles = theme => ({
@@ -85,8 +85,8 @@ const styles = theme => ({
   },
   list: {
     color: theme.palette.grey[700],
-    paddingLeft: theme.spacing(3),
-    paddingRight: theme.spacing(3),
+    paddingLeft: theme.spacing(1),
+    paddingRight: theme.spacing(1),
   },
   icon: {
     color: theme.palette.primary.main,
@@ -106,60 +106,50 @@ const styles = theme => ({
     bottom: '0px',
     fontSize: '20px',
   },
+  emptyButton: {
+    textAlign: 'center',
+    marginTop: theme.spacing(2),
+  },
 });
 
 class Main extends React.Component {
   state = {
     circularProgress: false,
-    members: [
-      {
-        name: '이윤규', place_name: '고려대학교 서울캠퍼스', address_name: '서울특별시 송파구 잠실동 204-5', x: '127.031685000726', y: '37.5898422803883',
-      },
-      {
-        name: '임해인', address_name: '서울 동대문구 제기동 148-6', x: '127.03103903252514', y: '37.58298409427197',
-      },
-    ],
+    members: [],
   }
 
   static propTypes = {
     classes: PropTypes.object.isRequired,
+    location: PropTypes.object.isRequired,
     history: PropTypes.object.isRequired,
   }
 
-  handleClick = () => {
-    this.setState({
-      circularProgress: true,
-    });
-    if (navigator.geolocation) {
-      // GeoLocation을 이용해서 접속 위치를 얻어옵니다
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const lat = position.coords.latitude; // 위도
-          const lon = position.coords.longitude; // 경도
-          this.goSpotPage(lat, lon);
-        },
-        (err) => {
-          console.warn(`ERROR(${err.code}): ${err.message}`);
-        },
-      );
-    } else { // HTML5의 GeoLocation을 사용할 수 없을때 마커 표시 위치와 인포윈도우 내용을 설정합니다
-      // 일단 카카오 본사로 찍고 스팟 보냄
-      this.goSpotPage(33.450701, 126.570667);
-    }
-  };
+  componentDidMount() {
+    const { location: { search } } = this.props;
+    if (search.length > 0) {
+      const parsedQuery = queryString.parse(search);
+      const name = parsedQuery.name.split(',');
+      const place = parsedQuery.place.split(',');
+      const x = parsedQuery.x.split(',');
+      const y = parsedQuery.y.split(',');
 
-  goSpotPage = (lat, lon) => {
-    getFireDB().ref().push({ master: { lat, lon } })
-      .then((result) => {
-        const { key } = result;
-        window.localStorage.setItem(key, 'master');
-        const { history } = this.props;
-        history.push(`/spot/${key}`);
-      })
-      .catch((e) => {
-        console.log(e);
+      const arrLen = name.length;
+      const pointArr = [];
+      for (let i = 0; i < arrLen; i += 1) {
+        const obj = {
+          name: name[i],
+          place_name: place[i],
+          x: x[i],
+          y: y[i],
+        };
+        pointArr.push(obj);
+      }
+
+      this.setState({
+        members: pointArr,
       });
-  };
+    }
+  }
 
   goSpot = () => {
     const { history } = this.props;
@@ -182,6 +172,14 @@ class Main extends React.Component {
     });
   }
 
+
+  addList = (item) => {
+    const { members } = this.state;
+    this.setState({
+      members: members.concat(item),
+    });
+  }
+
   render() {
     const { classes } = this.props;
     const { circularProgress, members } = this.state;
@@ -201,7 +199,6 @@ class Main extends React.Component {
           <div>
             <Grid
               container
-              spacing={1}
               direction="row"
               justify="center"
               alignItems="center"
@@ -219,6 +216,16 @@ class Main extends React.Component {
                   </Typography>
                 </Paper>
               </Grid>
+              <Grid item xs={12}><Divider /></Grid>
+              {
+                members.length === 0 ? (
+                  <Grid item xs={12} className={classes.emptyButton}>
+                    <Button variant="outlined" color="primary">
+                      만날 사람들을 추가해주세요!
+                    </Button>
+                  </Grid>
+                ) : ''
+              }
               <Grid item xs={12} onClick={this.openDialaog}>
                 <List className={classes.list}>
                   {members.map((value, i) => {
@@ -228,9 +235,6 @@ class Main extends React.Component {
                         <Chip label={`${value.name}`} color="primary" className={classes.chip} />
                         <Chip label={`${place}`} color="primary" variant="outlined" className={classes.chip} />
                         <ListItemSecondaryAction>
-                          <IconButton edge="end" aria-label="subway">
-                            <SubwayIcon className={classes.icon} />
-                          </IconButton>
                           <IconButton edge="end" aria-label="subway" onClick={() => this.deleteItem(i)}>
                             <DeleteIcon />
                           </IconButton>
@@ -242,7 +246,7 @@ class Main extends React.Component {
               </Grid>
               <Grid item xs={12}><Divider /></Grid>
               <Grid item xs={12} onClick={this.openDialaog} className={classes.title}>
-                <SearchBar />
+                <SearchBar addList={item => this.addList(item)} memberLen={members.length + 1} />
               </Grid>
             </Grid>
           </div>

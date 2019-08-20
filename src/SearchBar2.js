@@ -1,23 +1,20 @@
 import React from 'react';
 import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
+import clsx from 'clsx';
 import {
-  Button, AppBar, Toolbar, List, ListItem, ListItemText,
+  List, ListItem, ListItemText,
 } from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
-import CloseIcon from '@material-ui/icons/Close';
-import { withStyles, ThemeProvider } from '@material-ui/styles';
+import { withStyles } from '@material-ui/styles';
 import Grid from '@material-ui/core/Grid';
 import InputBase from '@material-ui/core/InputBase';
 import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
-import MenuIcon from '@material-ui/icons/Menu';
 import SearchIcon from '@material-ui/icons/Search';
 import AddIcon from '@material-ui/icons/Add';
 import DirectionsIcon from '@material-ui/icons/Directions';
 import PropTypes from 'prop-types';
-import { fade, makeStyles, createMuiTheme } from '@material-ui/core/styles';
-import { red } from '@material-ui/core/colors';
 
 const styles = theme => ({
   root: {
@@ -26,6 +23,7 @@ const styles = theme => ({
     width: '100%',
     height: '100%',
     padding: theme.spacing(0),
+    display: 'flex',
   },
   paper: {
     padding: theme.spacing(1),
@@ -44,11 +42,12 @@ const styles = theme => ({
     height: 28,
     margin: 4,
   },
-});
-
-const theme = createMuiTheme({
-  palette: {
-    primary: red,
+  textField: {
+    marginLeft: theme.spacing(1),
+    marginRight: theme.spacing(1),
+  },
+  dense: {
+    marginTop: theme.spacing(2),
   },
 });
 
@@ -58,19 +57,38 @@ class SearchBar extends React.Component {
     addr: '',
     searchDialog: false,
     results: [],
+    name: '',
   }
 
   static propTypes = {
     classes: PropTypes.object.isRequired,
+    addList: PropTypes.func.isRequired,
+    memberLen: PropTypes.number.isRequired,
     /* match: PropTypes.object.isRequired, */
   }
 
+  handleNameChange = (e) => {
+    this.setState({
+      name: e.target.value,
+    });
+  }
+
   handleSearchResult = (v, e) => {
-    console.log('hihi');
-    console.log(v);
-    console.log(this.props);
-    this.props.addMyMarker(v.y, v.x);
-    this.setState({ searchDialog: false });
+    const { addList, memberLen } = this.props;
+    let { name } = this.state;
+    if (name.length === 0) name = `참석자${memberLen}`;
+    addList({
+      name,
+      x: v.x,
+      y: v.y,
+      place_name: v.place_name ? v.place_name : v.address_name,
+    });
+    this.setState({
+      searchDialog: false,
+      addr: '',
+      results: [],
+      name: '',
+    });
   }
 
   handleChange = (e) => {
@@ -80,18 +98,32 @@ class SearchBar extends React.Component {
   }
 
   handleMyPClick = () => {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const lat = position.coords.latitude; // 위도
-        const lon = position.coords.longitude; // 경도
-        this.props.addMyMarker(lat, lon);
-      },
-    );
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude; // 위도
+          const lon = position.coords.longitude; // 경도
+          const { addList, memberLen } = this.props;
+          let { name } = this.state;
+          if (name.length === 0) name = `참석자${memberLen}`;
+          addList({
+            name,
+            x: lon,
+            y: lat,
+            place_name: '내 위치',
+          });
+          this.setState({ searchDialog: false });
+        },
+      );
+    } else {
+      alert('위치 검색을 허용하지 않았거나 위치 검색을 지원하지 않는 브라우저입니다');
+    }
   }
 
   handleBtnClick = () => {
     // 검색 input
-    const input = this.state.addr;
+    const { addr } = this.state;
+    const input = addr;
 
     // state의 results를 담는 객체
     let datas = [];
@@ -116,7 +148,6 @@ class SearchBar extends React.Component {
 
         // 검색 결과로 나온 장소 객체들을 붙임
         datas = result;
-        console.log(datas);
 
         // state의 빈 results 객체에 결과를 concat
         this.setState({
@@ -131,8 +162,7 @@ class SearchBar extends React.Component {
         ps.keywordSearch(input, (result, status, pagination) => {
           if (status === window.daum.maps.services.Status.OK) {
             // 검색 결과로 나온 장소 객체들을 붙임
-            datas = result;
-            console.log(datas);
+            datas = result.filter((v, i) => i < 5);
 
             // state의 빈 results 객체에 결과를 concat
             this.setState({
@@ -190,18 +220,15 @@ class SearchBar extends React.Component {
             justify="space-evenly"
             alignItems="flex-end"
           >
-            <ThemeProvider theme={theme}>
-              <TextField
-                className={classes.margin}
-                label="ThemeProvider"
-                variant="outlined"
-                id="mui-theme-provider-outlined-input"
-              />
-            </ThemeProvider>
-            <Grid item xs={12}>
-              <IconButton className={classes.iconButton} aria-label="Menu">
-                <MenuIcon />
-              </IconButton>
+            <TextField
+              id="outlined-dense"
+              label="참석자 이름"
+              className={clsx(classes.textField, classes.dense)}
+              onChange={this.handleNameChange}
+              margin="dense"
+              variant="outlined"
+            />
+            <Grid item xs={12} className={classes.root}>
               <InputBase
                 id="standard-search"
                 value={addr}
@@ -209,6 +236,11 @@ class SearchBar extends React.Component {
                 className={classes.input}
                 placeholder="장소를 검색하세요!"
                 inputProps={{ 'aria-label': '장소를 검색하세요!' }}
+                onKeyPress={(event) => {
+                  if (event.key === 'Enter') {
+                    this.handleBtnClick();
+                  }
+                }}
               />
               <IconButton
                 id="searchBtn"
@@ -227,11 +259,30 @@ class SearchBar extends React.Component {
                 onClick={this.handleMyPClick}
               >
                 <DirectionsIcon />
-                <Typography variant="caption" display="block">
-                  내위치
-                </Typography>
               </IconButton>
             </Grid>
+          </Grid>
+          <Grid item xs={12}>
+            <List>
+              {results.map((value, i) => (
+                <ListItem
+                  button
+                  onClick={e => this.handleSearchResult(value, e)}
+                  key={i.toString()}
+                >
+                  <ListItemText
+                    primary={value.place_name ? value.place_name : value.address_name}
+                    secondary={(
+                      <Typography
+                        variant="body2"
+                      >
+                        {value.place_name && value.address_name}
+                      </Typography>
+                    )}
+                  />
+                </ListItem>
+              ))}
+            </List>
           </Grid>
         </Dialog>
       </div>
