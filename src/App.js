@@ -2,18 +2,21 @@ import React from 'react';
 import { Route, BrowserRouter } from 'react-router-dom';
 import { ThemeProvider } from '@material-ui/styles';
 import { createMuiTheme } from '@material-ui/core/styles';
-import { purple, orange, red, grey } from '@material-ui/core/colors';
+import {
+  purple, orange, red, grey, yellow, pink, indigo, blueGrey,
+} from '@material-ui/core/colors';
 import SpotPage from './SpotPage';
 import Main from './Main';
 
 const theme = createMuiTheme({
   palette: {
     primary: red,
-    secondary: purple,
+    secondary: blueGrey,
     third: grey,
   },
   status: {
     danger: orange[500],
+    kakao: '#ffe812',
   },
 });
 

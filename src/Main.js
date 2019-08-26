@@ -82,7 +82,7 @@ const styles = theme => ({
   titleMargin: {
     flexGrow: 1,
     textAlign: 'center',
-    marginTop: theme.spacing(2)
+    marginTop: theme.spacing(2),
   },
   colorGrey: {
     color: theme.palette.grey[700],
@@ -164,7 +164,7 @@ class Main extends React.Component {
       const ys = members.map(v => v.y).reduce((p, v) => `${p},${v}`);
       const placeNames = members.map(v => (v.place_name ? v.place_name : v.address_name)).reduce((p, v) => `${p},${v}`);
       const names = members.map(v => v.name).reduce((p, v) => `${p},${v}`);
-      history.push(`/spot?x=${xs}&y=${ys}&place=${placeNames}&name=${names}`);
+      history.push(`/spot?x=${xs}&y=${ys}&place=${placeNames}&name=${names}&count=1&category=0&select=0`);
     } else {
       alert('적어도 한명 이상의 멤버를 설정해주세요!');
     }
