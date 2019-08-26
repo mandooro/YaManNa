@@ -133,6 +133,7 @@ class Main extends React.Component {
     const { location: { search } } = this.props;
     if (search.length > 0) {
       const parsedQuery = queryString.parse(search);
+      if (!parsedQuery.name) return;
       const name = parsedQuery.name.split(',');
       const place = parsedQuery.place.split(',');
       const x = parsedQuery.x.split(',');
