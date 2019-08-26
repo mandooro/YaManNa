@@ -14,7 +14,6 @@ import Button from '@material-ui/core/Button';
 import Select from '@material-ui/core/Select';
 import queryString from 'query-string';
 import { getCenter, basicCenterAlorithm } from './lib/utils';
-import Toolbar from "@material-ui/core/Toolbar/Toolbar";
 
 const styles = theme => ({
   title: {

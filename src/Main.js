@@ -14,13 +14,12 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import IconButton from '@material-ui/core/IconButton';
-import SubwayIcon from '@material-ui/icons/Subway';
 import FaceIcon from '@material-ui/icons/Face';
 import Chip from '@material-ui/core/Chip';
 import Divider from '@material-ui/core/Divider';
 import DeleteIcon from '@material-ui/icons/Cancel';
 import queryString from 'query-string';
-import SearchBar from './SearchBar2';
+import SearchBar from './SearchBar';
 import ManduroImage from './images/manduro.png';
 
 
