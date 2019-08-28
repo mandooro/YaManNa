@@ -55,6 +55,12 @@ const styles = theme => ({
     right: '0',
     zIndex: '10',
   },
+  topBar: {
+    position: 'fixed',
+    top: '60px',
+    right: '0',
+    zIndex: '10',
+  },
   icon2: {
     position: 'fixed',
     left: '20px',
@@ -74,7 +80,7 @@ const styles = theme => ({
     position: 'fixed',
     left: '20px',
     top: '60px',
-    zIndex: '10',
+    zIndex: '11',
   },
   kakaoButton: {
     borderRadius: 0,
@@ -83,6 +89,9 @@ const styles = theme => ({
   },
   findRoadButton: {
     borderRadius: 0,
+  },
+  topButton: {
+
   },
 });
 
@@ -309,6 +318,9 @@ class MapPage extends React.Component {
         this.addCategoryMarker(data);
         return data;
       }
+      const { categoryIndex } = this.state;
+      if (categoryIndex === 7) alert('이 주변엔 아무 시설도 보이지 않습니다');
+      else this.handleChangeCategory(null, (categoryIndex + 1) % 8);
       return null;
     };
 
@@ -347,8 +359,6 @@ class MapPage extends React.Component {
     const people = parsedQuery.name.split(',');
     const { categorymarkers, findRoad } = this.state;
     const destination = categorymarkers[findRoad];
-    const y = destination.getPosition().getLat();
-    const x = destination.getPosition().getLng();
     const name = destination.getContent().replace(/(<([^>]+)>)/ig, '');
     window.Kakao.Link.sendDefault({
       objectType: 'text',
@@ -426,6 +436,58 @@ class MapPage extends React.Component {
           {/* <Chip label="카톡 공유" className={classes.icon} onClick={this.shareThisPage} /> */}
           <Grid
             container
+            className={classes.topBar}
+            direction="row"
+            justify="flex-end"
+            alignItems="center"
+          >
+            <Grid item xs={6} align="right">
+              <ButtonGroup
+                variant="contained"
+                color="primary"
+                ref={(ref) => {
+                  this.anchor2 = ref;
+                }}
+                aria-label="split button"
+              >
+                <Button
+                  className={classes.topButton}
+                  onClick={this.handleCountToggle}
+                >
+                  주변 {searchSize} 개
+                  <ArrowDropDownIcon />
+                </Button>
+              </ButtonGroup>
+              <Popper open={countToggle} anchorEl={this.anchor2} transition disablePortal>
+                {({ TransitionProps, placement }) => (
+                  <Grow
+                    {...TransitionProps}
+                    style={{
+                      transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom',
+                    }}
+                  >
+                    <Paper id="menu-list-grow">
+                      <ClickAwayListener onClickAway={this.handleClose}>
+                        <MenuList>
+                          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((v, i) => (
+                            <MenuItem
+                              key={i.toString()}
+                              selected={i === searchSize - 1}
+                              onClick={event => this.handleSizeChange(event, i)}
+                            >
+                              {v}개
+                            </MenuItem>
+                          ))}
+                        </MenuList>
+                      </ClickAwayListener>
+                    </Paper>
+                  </Grow>
+                )}
+              </Popper>
+            </Grid>
+          </Grid>
+          <Grid
+            container
             className={classes.bottomBar}
             direction="row"
             justify="flex-end"
@@ -440,13 +502,6 @@ class MapPage extends React.Component {
                 }}
                 aria-label="split button"
               >
-                <Button
-                  className={classes.button}
-                  onClick={this.handleCountToggle}
-                >
-                  {searchSize} 개
-                  <ArrowDropDownIcon />
-                </Button>
                 <Button className={classes.button} onClick={this.handleToggle}>{categorymarkers[findRoad] && categorymarkers[findRoad].getContent().replace(/(<([^>]+)>)/ig, '')} <ArrowDropDownIcon /></Button>
                 <Button
                   className={classes.findRoadButton}
@@ -485,32 +540,6 @@ class MapPage extends React.Component {
                               onClick={event => this.handleKakaoMessageChange(event, i)}
                             >
                               {v.getContent().replace(/(<([^>]+)>)/ig, '')}
-                            </MenuItem>
-                          ))}
-                        </MenuList>
-                      </ClickAwayListener>
-                    </Paper>
-                  </Grow>
-                )}
-              </Popper>
-              <Popper open={countToggle} anchorEl={this.anchor} transition disablePortal>
-                {({ TransitionProps, placement }) => (
-                  <Grow
-                    {...TransitionProps}
-                    style={{
-                      transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom',
-                    }}
-                  >
-                    <Paper id="menu-list-grow">
-                      <ClickAwayListener onClickAway={this.handleClose}>
-                        <MenuList>
-                          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((v, i) => (
-                            <MenuItem
-                              key={i.toString()}
-                              selected={i === searchSize - 1}
-                              onClick={event => this.handleSizeChange(event, i)}
-                            >
-                              {v}개
                             </MenuItem>
                           ))}
                         </MenuList>

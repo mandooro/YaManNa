@@ -160,14 +160,14 @@ class Main extends React.Component {
   goSpot = () => {
     const { history } = this.props;
     const { members } = this.state;
-    if (members.length > 0) {
+    if (members.length > 1) {
       const xs = members.map(v => v.x).reduce((p, v) => `${p},${v}`);
       const ys = members.map(v => v.y).reduce((p, v) => `${p},${v}`);
       const placeNames = members.map(v => (v.place_name ? v.place_name : v.address_name)).reduce((p, v) => `${p},${v}`);
       const names = members.map(v => v.name).reduce((p, v) => `${p},${v}`);
-      history.push(`/spot?x=${xs}&y=${ys}&place=${placeNames}&name=${names}&count=1&category=0&select=0`);
+      history.push(`/spot?x=${xs}&y=${ys}&place=${placeNames}&name=${names}&count=2&category=0&select=0`);
     } else {
-      alert('적어도 한명 이상의 멤버를 설정해주세요!');
+      alert('적어도 두명 이상의 멤버를 설정해주세요!');
     }
   }
 
