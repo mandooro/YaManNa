@@ -21,8 +21,10 @@ import Paper from '@material-ui/core/Paper';
 import Popper from '@material-ui/core/Popper';
 import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
+import Toolbar from '@material-ui/core/Toolbar/Toolbar';
+import { csv } from 'd3-request';
 import { getCenter, basicCenterAlorithm } from './lib/utils';
-import Toolbar from "@material-ui/core/Toolbar/Toolbar";
+import stationScore from './data/StationScore.csv';
 
 const styles = theme => ({
   title: {
@@ -198,7 +200,7 @@ class MapPage extends React.Component {
     const markers = pointArr.map((v) => {
       const lat = v.y;
       const lon = v.x;
-      const content = `<div class ="label" style="color: #484d8b; background-color: white; padding: 5px; border: 1px solid #484d8b; border-radius: 30px;"><span class="left"></span><span class="center">${v.name}</span><span class="right"></span></div>`;
+      const content = `<div class ="label" style="color: #484d8b; background-color: white; padding: 2px; border: 1px solid #484d8b; border-radius: 30px; font-size: 12px; line-height: 12px"><span class="left"></span><span class="center">${v.name}</span><span class="right"></span></div>`;
       const pointPosition = new window.kakao.maps.LatLng(lat, lon);
       const point = new window.kakao.maps.CustomOverlay({
         map, // 마커를 표시할 지도
@@ -222,17 +224,40 @@ class MapPage extends React.Component {
     this.setCenterMarker(categoryCode[categoryIndex].code);
   }
 
-  addCategoryMarker = (data) => {
+  calRecommendScore = () => new Promise((resolve) => {
+    csv(stationScore, (err, dt) => resolve(dt));
+  })
+
+  addCategoryMarker = async (data) => {
     const {
-      map, categorymarkers, markers, searchSize,
+      map, categorymarkers, markers, searchSize, categoryIndex,
     } = this.state;
     categorymarkers.forEach(v => v.setMap(null));
     const bounds = new window.kakao.maps.LatLngBounds();
     markers.forEach(v => bounds.extend(v.getPosition()));
-    const overlayArr = data.filter((v, i) => i < searchSize)
+    let calData = data;
+    if (categoryIndex === 0) {
+      const dt = await this.calRecommendScore();
+      const filteredData = data.filter((v, i) => i < 6);
+      filteredData.sort((a, b) => {
+        const aName = a.place_name.split('역 ')[0];
+        const bName = b.place_name.split('역 ')[0];
+        const aFind = dt.find(v => v['역명'] === aName);
+        const bFind = dt.find(v => v['역명'] === bName);
+        let aScore;
+        if (!aFind) aScore = -1;
+        else aScore = aFind['가중치'];
+        let bScore;
+        if (!bFind) bScore = -1;
+        else bScore = bFind['가중치'];
+        return bScore - aScore;
+      });
+      calData = filteredData;
+    }
+    const overlayArr = calData.filter((v, i) => i < searchSize)
       .map((v) => {
         // 커스텀 오버레이가 표시될 위치입니다
-        const content = `<a href=${v.place_url} style="text-decoration:none" target="_blank"><div class ="label" style="color: #ff0000; background-color: white; padding: 5px; border: 1px solid #ff0000; border-radius: 30px;"><span class="left"></span><span class="center">${v.place_name}</span><span class="right"></span></div></a>`;
+        const content = `<a href=${v.place_url} style="text-decoration:none" target="_blank"><div class ="label" style="color: #ff0000; background-color: white; padding: 2px; border: 1px solid #ff0000; border-radius: 30px; font-size: 12px; line-height: 12px"><span class="left"></span><span class="center">${v.place_name}</span><span class="right"></span></div></a>`;
         const position = new window.kakao.maps.LatLng(v.y, v.x);
 
         bounds.extend(position);
