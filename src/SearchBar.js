@@ -200,7 +200,7 @@ class SearchBar extends React.Component {
     return (
       <div>
         <Grid item xs={12}>
-          <Button variant="outlined" color="primary" onClick={this.openSearchDialog} >
+          <Button variant="outlined" color="primary" onClick={this.openSearchDialog}>
             만날 사람들을 추가해주세요!
           </Button>
         </Grid>

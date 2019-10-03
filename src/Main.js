@@ -222,7 +222,14 @@ class Main extends React.Component {
                   </Typography>
                 </Paper>
               </Grid>
-              <Grid item xs={12} onClick={this.openDialaog}>
+              <Grid
+                item
+                xs={12}
+                onClick={this.openDialaog}
+                onContextMenu={(e) => {
+                  console.log(e);
+                }}
+              >
                 <List className={classes.list}>
                   {members.map((value, i) => {
                     const place = value.place_name ? value.place_name : value.address_name;

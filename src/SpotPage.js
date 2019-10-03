@@ -238,7 +238,7 @@ class MapPage extends React.Component {
     let calData = data;
     if (categoryIndex === 0) {
       const dt = await this.calRecommendScore();
-      const filteredData = data.filter((v, i) => i < 6);
+      const filteredData = data.filter((v, i) => i < 10);
       filteredData.sort((a, b) => {
         const aName = a.place_name.split('역 ')[0];
         const bName = b.place_name.split('역 ')[0];
